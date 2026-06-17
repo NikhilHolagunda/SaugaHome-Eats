@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Custom Properties — Design System */
+:root {
+  --cream: #FFF8F0;
+  --navy: #1E2761;
+  --coral: #F96167;
+  --gold: #F4A261;
+  --text-dark: #1F2937;
+  --text-muted: #6B7280;
+  --card-bg: #FFFFFF;
+  --border: #E5E7EB;
+}
+
+/* Global base styles */
+body {
+  background-color: var(--cream);
+  color: var(--text-dark);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Smooth focus outlines */
+*:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
