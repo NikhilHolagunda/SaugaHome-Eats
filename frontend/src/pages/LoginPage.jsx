@@ -21,8 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await loginApi({ email: form.email, password: form.password });
-      saveToken(data.token);
-      saveSeller({ id: data.id, email: data.email });
+      saveSellerSession(data.token, { id: data.id, email: data.email });
       navigate(data.hasListing ? '/' : '/seller/create-listing');
     } catch (err) {
       setError(err.message);
