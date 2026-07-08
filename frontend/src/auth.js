@@ -5,7 +5,6 @@ const TOKEN_KEY = 'saugahomeeats_token';
 const SELLER_KEY = 'saugahomeeats_seller';
 const BUYER_KEY = 'saugahomeeats_buyer';
 
-// ── Token ──────────────────────────────────────────────────────────────────
 export function saveToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
 }
@@ -24,7 +23,6 @@ export function isLoggedIn() {
   return !!localStorage.getItem(TOKEN_KEY);
 }
 
-// ── Seller (Sprint 1) ──────────────────────────────────────────────────────
 export function saveSeller(seller) {
   localStorage.setItem(SELLER_KEY, JSON.stringify(seller));
 }
@@ -38,7 +36,6 @@ export function isSeller() {
   return !!localStorage.getItem(SELLER_KEY);
 }
 
-// ── Buyer (Sprint 2) ───────────────────────────────────────────────────────
 export function saveBuyer(buyer) {
   localStorage.setItem(BUYER_KEY, JSON.stringify(buyer));
 }
@@ -50,4 +47,18 @@ export function getBuyer() {
 
 export function isBuyer() {
   return !!localStorage.getItem(BUYER_KEY);
+}
+
+// Combined session helpers — prevent seller/buyer localStorage keys from
+// contaminating each other when the same browser logs into both roles.
+export function saveSellerSession(token, seller) {
+  localStorage.removeItem(BUYER_KEY);
+  saveToken(token);
+  saveSeller(seller);
+}
+
+export function saveBuyerSession(token, buyer) {
+  localStorage.removeItem(SELLER_KEY);
+  saveToken(token);
+  saveBuyer(buyer);
 }
