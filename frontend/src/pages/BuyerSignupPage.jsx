@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signupBuyerApi } from '../api';
-import { saveToken, saveBuyer } from '../auth';
+import { saveBuyerSession } from '../auth';
 
 export default function BuyerSignupPage() {
   const navigate = useNavigate();
@@ -23,8 +23,7 @@ export default function BuyerSignupPage() {
     setSubmitting(true);
     try {
       const res = await signupBuyerApi({ email, password, name: name || null });
-      saveToken(res.token);
-      saveBuyer({ id: res.id, email: res.email, name: res.name });
+    saveBuyerSession(res.token, { id: res.id, email: res.email, name: res.name });
       navigate('/');
     } catch (err) {
       setError(err.message);
