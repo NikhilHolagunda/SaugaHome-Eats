@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginBuyerApi } from '../api';
-import { saveToken, saveBuyer } from '../auth';
+import { saveBuyerSession } from '../auth';
 
 export default function BuyerLoginPage() {
   const navigate = useNavigate();
@@ -17,8 +17,7 @@ export default function BuyerLoginPage() {
     setSubmitting(true);
     try {
       const res = await loginBuyerApi({ email, password });
-      saveToken(res.token);
-      saveBuyer({ id: res.id, email: res.email, name: res.name });
+      saveBuyerSession(res.token, { id: res.id, email: res.email, name: res.name });
       navigate('/');
     } catch (err) {
       setError(err.message);
