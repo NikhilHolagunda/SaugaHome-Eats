@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signupApi } from '../api';
-import { saveToken, saveSeller } from '../auth';
+import { saveSellerSession } from '../auth';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -33,8 +33,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const data = await signupApi({ email: form.email, password: form.password });
-      saveToken(data.token);
-      saveSeller({ id: data.id, email: data.email });
+      saveSellerSession(data.token, { id: data.id, email: data.email });
       navigate('/seller/create-listing');
     } catch (err) {
       setServerError(err.message);
