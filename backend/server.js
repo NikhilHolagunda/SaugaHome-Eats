@@ -488,6 +488,21 @@ app.patch('/api/orders/:id/status', authMiddleware, requireSeller, (req, res) =>
 });
 
 // ── Start server ──────────────────────────────────────────────────────────────
+// Error handler — must be last, after all routes
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'Photo is too large. Max size is 10MB.' });
+    }
+    return res.status(400).json({ error: err.message });
+  }
+  if (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on the server.' });
+  }
+  next();
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
