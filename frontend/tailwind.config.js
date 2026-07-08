@@ -20,7 +20,18 @@ export default {
         serif: ['Playfair Display', 'Georgia', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
-    },
-  },
-  plugins: [],
-}
+      boxShadow: {
+        soft: '0 2px 12px rgba(30, 39, 97, 0.06)',
+        card: '0 4px 20px rgba(30, 39, 97, 0.08)',
+        'card-hover': '0 12px 32px rgba(30, 39, 97, 0.16)',
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-400px 0' },
+          '100%': { backgroundPosition: '400px 0' },
+        },
+      },
