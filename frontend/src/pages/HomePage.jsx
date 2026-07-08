@@ -4,6 +4,19 @@ import { Link } from 'react-router-dom';
 import SellerCard from '../components/SellerCard';
 import { getSellersApi } from '../api';
 
+function SkeletonCard() {
+  return (
+    <div className="bg-card-bg rounded-xl shadow-soft overflow-hidden">
+      <div className="aspect-[4/3] skeleton" />
+      <div className="p-4 space-y-2">
+        <div className="skeleton h-5 w-3/4" />
+        <div className="skeleton h-4 w-1/2" />
+        <div className="skeleton h-4 w-2/3" />
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +38,6 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="bg-gradient-to-br from-navy via-navy/95 to-navy/80 text-white py-20 px-4 relative overflow-hidden">
-        {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-coral/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
@@ -70,9 +82,8 @@ export default function HomePage() {
         <h2 className="font-serif text-3xl font-bold text-navy mb-8">Our Home Cooks</h2>
 
         {loading && (
-          <div className="text-center py-16 text-text-muted">
-            <div className="text-4xl mb-4 animate-pulse">🍽️</div>
-            <p className="text-lg">Loading sellers…</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         )}
 
@@ -98,8 +109,10 @@ export default function HomePage() {
 
         {!loading && !error && sellers.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sellers.map(seller => (
-              <SellerCard key={seller.id} seller={seller} />
+            {sellers.map((seller, i) => (
+              <div key={seller.id} className="stagger-item" style={{ animationDelay: `${Math.min(i * 60, 400)}ms` }}>
+                <SellerCard seller={seller} />
+              </div>
             ))}
           </div>
         )}
