@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
@@ -11,6 +12,8 @@ import SellerDetailPage from './pages/SellerDetailPage';
 
 import BuyerSignupPage from './pages/BuyerSignupPage';
 import BuyerLoginPage from './pages/BuyerLoginPage';
+import SellerMenuPage from './pages/SellerMenuPage';
+import BuyerOrdersPage from './pages/BuyerOrdersPage';
 
 export default function App() {
   return (
@@ -31,11 +34,18 @@ export default function App() {
             <Route path="/buyer/signup" element={<BuyerSignupPage />} />
             <Route path="/buyer/login" element={<BuyerLoginPage />} />
 
-            {/* Placeholders — Steps 7-11 will replace these */}
-            <Route path="/seller/menu" element={<Placeholder title="My Menu" />} />
+            {/* Sprint 2 — ordering */}
+            <Route
+              path="/seller/menu"
+              element={<ProtectedRoute role="seller"><SellerMenuPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/buyer/orders"
+              element={<ProtectedRoute role="buyer"><BuyerOrdersPage /></ProtectedRoute>}
+            />
+
+            {/* Placeholder — seller order dashboard not built yet */}
             <Route path="/seller/dashboard" element={<Placeholder title="Seller Dashboard" />} />
-            <Route path="/buyer/orders" element={<Placeholder title="My Orders" />} />
-            <Route path="/seller/:id/order" element={<Placeholder title="Place Order" />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -50,7 +60,7 @@ function Placeholder({ title }) {
   return (
     <div className="max-w-4xl mx-auto p-8">
       <h1 className="font-serif text-3xl font-bold text-navy">{title}</h1>
-      <p className="text-textmuted mt-2">Coming in the next step.</p>
+      <p className="text-text-muted mt-2">Coming in the next step.</p>
     </div>
   );
 }
@@ -59,7 +69,7 @@ function NotFound() {
   return (
     <div className="max-w-4xl mx-auto p-8 text-center">
       <h1 className="font-serif text-4xl font-bold text-navy">404</h1>
-      <p className="text-textmuted mt-2">Page not found.</p>
+      <p className="text-text-muted mt-2">Page not found.</p>
     </div>
   );
 }
