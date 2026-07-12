@@ -59,6 +59,56 @@ h1, h2, h3, h4, h5, h6 {
        transform: translateY(0);
      }
    }
+
+  /* Signature button shine — a soft light sweep on hover, used by <Button /> */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.65s ease;
+    pointer-events: none;
+  }
+  .btn-shine:hover::before {
+    left: 125%;
+  }
+
+  /* Signature card lift — used by SellerCard on the browse grid */
+  .card-glow {
+    box-shadow: 0 2px 12px rgba(30, 39, 97, 0.08);
+    transition: box-shadow 0.35s ease, transform 0.35s ease;
+  }
+  .card-glow:hover {
+    box-shadow: 0 20px 40px -14px rgba(249, 97, 103, 0.35), 0 8px 18px -10px rgba(30, 39, 97, 0.18);
+    transform: translateY(-4px);
+  }
+
+  /* Nav link underline — grows from center on hover, used in Navbar */
+  .nav-link {
+    position: relative;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 0;
+    height: 2px;
+    background: var(--coral);
+    transition: width 0.25s ease, left 0.25s ease;
+  }
+  .nav-link:hover::after {
+    left: 0;
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

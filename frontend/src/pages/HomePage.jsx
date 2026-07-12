@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import SellerCard from '../components/SellerCard';
+import Button from '../components/Button';
 import { getSellersApi } from '../api';
 
 function SkeletonCard() {
@@ -52,18 +53,12 @@ export default function HomePage() {
             Discover Mississauga's hidden home cooks — tiffin services, bakers, and caterers right in your neighbourhood.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={scrollToGrid}
-              className="bg-coral text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-500 transition-colors text-lg"
-            >
+            <Button variant="primary" onClick={scrollToGrid} className="text-lg">
               Browse Cooks
-            </button>
-            <Link
-              to="/signup"
-              className="bg-white text-navy font-semibold px-8 py-3 rounded-lg hover:bg-cream transition-colors text-lg border border-white/20 text-center"
-            >
+            </Button>
+            <Button variant="secondary" to="/signup" className="text-lg bg-white">
               List Your Food
-            </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -98,12 +93,9 @@ export default function HomePage() {
             <div className="text-6xl mb-6">🏠</div>
             <h3 className="font-serif text-2xl text-navy mb-3">No sellers yet — be the first to list!</h3>
             <p className="text-text-muted mb-6">Share your home cooking with your Mississauga neighbours.</p>
-            <Link
-              to="/signup"
-              className="bg-coral text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-500 transition-colors inline-block"
-            >
+            <Button variant="primary" to="/signup">
               Create Your Listing
-            </Link>
+            </Button>
           </div>
         )}
 
