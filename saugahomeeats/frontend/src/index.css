@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Custom Properties — Design System */
+:root {
+  --cream: #FFF8F0;
+  --navy: #1E2761;
+  --coral: #F96167;
+  --gold: #F4A261;
+  --text-dark: #1F2937;
+  --text-muted: #6B7280;
+  --card-bg: #FFFFFF;
+  --border: #E5E7EB;
+}
+
+/* Global base styles */
+body {
+  background-color: var(--cream);
+  color: var(--text-dark);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Smooth focus outlines */
+*:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
+/* Loading skeleton shimmer, used for the home page grid while fetching */
+@layer components {
+  .skeleton {
+    @apply bg-navy/5 rounded-lg relative overflow-hidden animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      rgba(30, 39, 97, 0.04) 0px,
+      rgba(30, 39, 97, 0.10) 40px,
+      rgba(30, 39, 97, 0.04) 80px
+    );
+    background-size: 800px 100%;
+  }
+
+  .stagger-item {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
