@@ -110,7 +110,7 @@ export default function HomePage() {
         {!loading && !error && sellers.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sellers.map((seller, i) => (
-              <div key={seller.id} className="stagger-item" style={{ animationDelay: `${Math.min(i * 60, 400)}ms` }}>
+              <div key={seller.id} className="stagger-item h-full" style={{ animationDelay: `${Math.min(i * 60, 400)}ms` }}>
                 <SellerCard seller={seller} />
               </div>
             ))}

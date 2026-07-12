@@ -15,7 +15,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Square One',
     dietary_tags: 'vegetarian,halal',
     description: "Authentic Punjabi home cooking made with love and fresh spices sourced from my local market. Specializing in dal makhani, chole, and weekend tiffin boxes that taste just like mom used to make. Order by Friday for weekend delivery within Square One.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller1.jpg",
     menu: [
       { name: 'Dal Makhani', description: 'Slow-cooked black lentils in a creamy tomato butter sauce', price: 12.99 },
       { name: 'Butter Chicken', description: 'Tandoori chicken in a rich tomato-cream gravy, served with rice', price: 14.99 },
@@ -30,7 +30,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Erin Mills',
     dietary_tags: '',
     description: "Bringing the flavours of the Philippines to Mississauga -- adobo, sinigang, kare-kare, and lechon kawali made from traditional family recipes. Available for family parties, special occasions, and weekly meal prep. Tray orders accepted with 48 hours notice.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller2.jpg",
     menu: [
       { name: 'Chicken Adobo', description: 'Braised chicken in soy, vinegar, and garlic, served with rice', price: 13.99 },
       { name: 'Pork Sinigang', description: 'Tamarind-based sour soup with pork and vegetables', price: 14.99 },
@@ -45,7 +45,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Cooksville',
     dietary_tags: 'halal',
     description: "Jerk chicken, oxtail stew, and rice & peas that will transport you straight to Jamaica. Everything is made fresh to order with authentic island seasonings -- no shortcuts, no compromises. Available Fridays and Saturdays for pick-up or local delivery.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller3.jpg",
     menu: [
       { name: 'Jerk Chicken', description: 'Smoky, spicy grilled chicken marinated overnight', price: 14.99 },
       { name: 'Oxtail Stew', description: 'Slow-braised oxtail in a rich brown gravy with butter beans', price: 17.99 },
@@ -60,7 +60,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Meadowvale',
     dietary_tags: 'halal,vegetarian',
     description: "Handcrafted mithai, cookies, and celebration cakes for every occasion. Specialties include gulab jamun, kheer, and custom Eid gift boxes. All baked goods are 100% halal-certified. Minimum 3-day notice for custom orders.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller4.jpg",
     menu: [
       { name: 'Gulab Jamun (6 pc)', description: 'Soft milk dumplings soaked in rose-cardamom syrup', price: 7.99 },
       { name: 'Kheer', description: 'Creamy rice pudding with cardamom, saffron, and pistachios', price: 6.99 },
@@ -75,7 +75,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Mississauga Valley',
     dietary_tags: 'vegetarian,vegan,gluten-free',
     description: "Weekly tiffin subscriptions featuring Sri Lankan home cooking -- kottu roti, dhal curry, and freshly made pol sambol. Vegan and gluten-free options available every day. Subscribe for 5-day or 3-day weekly plans delivered to your door.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller5.jpg",
     menu: [
       { name: 'Kottu Roti', description: 'Chopped roti stir-fried with vegetables and spices', price: 13.99 },
       { name: 'Dhal Curry', description: 'Red lentils simmered in coconut milk and curry leaves', price: 9.99 },
@@ -90,7 +90,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Port Credit',
     dietary_tags: 'vegetarian',
     description: "Three generations of Italian cooking right here in Port Credit. Fresh pasta made by hand every morning, Sunday sauce slow-simmered for 6 hours, and tiramisu that won our family the Calabria food festival three years running. Portions are generous -- this is true Italian hospitality.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller6.jpg",
     menu: [
       { name: 'Fresh Fettuccine with Sunday Sauce', description: 'Handmade pasta with a 6-hour slow-simmered tomato sauce', price: 15.99 },
       { name: 'Homemade Margherita Pizza', description: 'Wood-fired-style crust with San Marzano tomatoes and basil', price: 13.99 },
@@ -105,7 +105,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Streetsville',
     dietary_tags: 'halal,gluten-free',
     description: "Jollof rice, egusi soup, and suya skewers that bring the bold, rich flavours of West Africa to your table. Made with imported spices and sustainably sourced ingredients. Perfect for family gatherings and office lunches. Orders taken via WhatsApp -- contact button below.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller7.jpg",
     menu: [
       { name: 'Jollof Rice', description: 'Smoky tomato rice, a West African classic', price: 12.99 },
       { name: 'Egusi Soup', description: 'Ground melon seed stew with leafy greens and spice', price: 14.99 },
@@ -120,7 +120,7 @@ const SEED_SELLERS = [
     neighbourhood: 'Clarkson',
     dietary_tags: 'vegetarian,vegan',
     description: "Full vegetarian Gujarati thali experience delivered to your home -- rotli, dal, shaak, khichdi, and seasonal pickles. Perfect for working families who want a wholesome home-cooked meal without the effort. Thali subscription plans available Monday through Saturday.",
-    photo_url: null,
+    photo_url: "/uploads/seed/seller8.jpg",
     menu: [
       { name: 'Full Gujarati Thali', description: 'Rotli, dal, shaak, rice, and seasonal pickle -- a complete meal', price: 16.99 },
       { name: 'Dhokla (6 pc)', description: 'Steamed savoury chickpea cakes with a mustard tempering', price: 6.99 },

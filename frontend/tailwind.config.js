@@ -35,3 +35,11 @@ export default {
           '100%': { backgroundPosition: '400px 0' },
         },
       },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+        shimmer: 'shimmer 1.4s ease-in-out infinite',
+      },
+    },
+  },
+  plugins: [],
+}

@@ -11,7 +11,7 @@ export default function SellerCard({ seller }) {
 
   return (
     <article
-      className="bg-card-bg rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden group"
+      className="bg-card-bg rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden group h-full flex flex-col"
       onClick={() => navigate(`/seller/${seller.id}`)}
       role="button"
       tabIndex={0}
@@ -34,7 +34,7 @@ export default function SellerCard({ seller }) {
       </div>
 
       {/* Info */}
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         <h3 className="font-serif text-lg font-semibold text-navy leading-tight mb-1">
           {seller.name}
         </h3>
@@ -43,7 +43,7 @@ export default function SellerCard({ seller }) {
           <span>📍</span> {seller.neighbourhood}
         </p>
         {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mt-auto">
             {tags.map(tag => <DietaryPill key={tag} tag={tag} />)}
           </div>
         )}
