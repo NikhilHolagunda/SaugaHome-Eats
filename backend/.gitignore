@@ -1,7 +1,22 @@
+# Dependencies
 node_modules/
+
+# Database
 *.db
 *.db-wal
 *.db-shm
-uploads/*
-!uploads/.gitkeep
+
+# Environment
 .env
+.env.local
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
