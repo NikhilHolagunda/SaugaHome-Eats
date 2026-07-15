@@ -14,6 +14,7 @@ import BuyerSignupPage from './pages/BuyerSignupPage';
 import BuyerLoginPage from './pages/BuyerLoginPage';
 import SellerMenuPage from './pages/SellerMenuPage';
 import BuyerOrdersPage from './pages/BuyerOrdersPage';
+import SellerOrdersPage from './pages/SellerOrdersPage';
 
 export default function App() {
   return (
@@ -44,8 +45,11 @@ export default function App() {
               element={<ProtectedRoute role="buyer"><BuyerOrdersPage /></ProtectedRoute>}
             />
 
-            {/* Placeholder — seller order dashboard not built yet */}
-            <Route path="/seller/dashboard" element={<Placeholder title="Seller Dashboard" />} />
+            {/* Sprint 2 US-10 — seller order dashboard */}
+            <Route
+              path="/seller/dashboard"
+              element={<ProtectedRoute role="seller"><SellerOrdersPage /></ProtectedRoute>}
+            />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -53,15 +57,6 @@ export default function App() {
         <Footer />
       </div>
     </BrowserRouter>
-  );
-}
-
-function Placeholder({ title }) {
-  return (
-    <div className="max-w-4xl mx-auto p-8">
-      <h1 className="font-serif text-3xl font-bold text-navy">{title}</h1>
-      <p className="text-text-muted mt-2">Coming in the next step.</p>
-    </div>
   );
 }
 
