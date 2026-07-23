@@ -30,6 +30,10 @@ export default function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/seller/create-listing" element={<CreateListingPage />} />
+            <Route
+              path="/seller/edit-profile"
+              element={<ProtectedRoute role="seller"><CreateListingPage isEditing /></ProtectedRoute>}
+            />
             <Route path="/seller/:id" element={<SellerDetailPage />} />
 
             {/* Buyer auth (Sprint 2) */}

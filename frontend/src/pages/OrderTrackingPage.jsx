@@ -2,16 +2,85 @@
 // Accessible to whichever party (buyer or seller) owns the order; the backend enforces that.
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getOrderByIdApi, photoUrl } from '../api';
-import { getToken } from '../auth';
+import { getOrderByIdApi, photoUrl, submitReviewApi } from '../api';
+import { getToken, isBuyer } from '../auth';
 import OrderStatusTimeline from '../components/OrderStatusTimeline';
 import DeliveryMap from '../components/DeliveryMap';
+import StarRating from '../components/StarRating';
 
 function formatDate(iso) {
   if (!iso) return '';
   return new Date(iso).toLocaleString('en-CA', {
     month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
   });
+}
+
+// US-15 — shown only to the buyer, only once the order is Delivered.
+// order.review comes pre-attached from GET /api/orders/:id, so a page refresh
+// (or the 5s poll) always reflects whether a review already exists.
+function ReviewSection({ order, onSubmitted }) {
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  if (order.status !== 'Delivered' || !isBuyer()) return null;
+
+  if (order.review) {
+    return (
+      <div className="bg-white border border-border rounded-xl shadow-soft p-6 mb-6">
+        <h2 className="font-serif text-lg font-bold text-navy mb-3">Your Review</h2>
+        <StarRating value={order.review.rating} readOnly />
+        {order.review.review_text && (
+          <p className="text-sm text-text-dark mt-3 leading-relaxed">{order.review.review_text}</p>
+        )}
+      </div>
+    );
+  }
+
+  async function handleSubmit() {
+    setError('');
+    if (rating < 1) {
+      setError('Please select a star rating.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const review = await submitReviewApi(getToken(), {
+        order_id: order.id,
+        rating,
+        review_text: text.trim() || undefined,
+      });
+      onSubmitted(review);
+    } catch (err) {
+      setError(err.message || 'Could not submit your review.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="bg-white border border-border rounded-xl shadow-soft p-6 mb-6">
+      <h2 className="font-serif text-lg font-bold text-navy mb-3">How was your order?</h2>
+      <StarRating value={rating} onChange={setRating} size="text-3xl" />
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        placeholder="Tell other buyers what you thought (optional)"
+        rows={3}
+        className="w-full mt-4 p-3 border border-border rounded-lg bg-white text-text-dark placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-coral/50 resize-none"
+      />
+      {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={submitting}
+        className="mt-4 bg-coral text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-500 transition-colors disabled:opacity-60"
+      >
+        {submitting ? 'Submitting…' : 'Submit review'}
+      </button>
+    </div>
+  );
 }
 
 export default function OrderTrackingPage() {
@@ -164,6 +233,12 @@ export default function OrderTrackingPage() {
           <span>${Number(order.total_price).toFixed(2)}</span>
         </div>
       </div>
+
+      {/* Review (US-15) */}
+      <ReviewSection
+        order={order}
+        onSubmitted={review => setOrder(prev => ({ ...prev, review }))}
+      />
     </div>
   );
 }

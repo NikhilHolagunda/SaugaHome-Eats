@@ -1,9 +1,11 @@
 // SellerDetailPage.jsx — View a seller's profile, menu, and place an order (US-04 + Sprint 2 ordering)
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getSellerByIdApi, getMenuApi, placeOrderApi, photoUrl } from '../api';
+import { getSellerByIdApi, getMenuApi, placeOrderApi, photoUrl, getSellerReviewsApi } from '../api';
 import { isBuyer, getToken } from '../auth';
 import DietaryPill from '../components/DietaryPill';
+import StarRating from '../components/StarRating';
+import ReviewCard from '../components/ReviewCard';
 
 export default function SellerDetailPage() {
   const { id } = useParams();
@@ -11,6 +13,7 @@ export default function SellerDetailPage() {
 
   const [seller, setSeller] = useState(null);
   const [menu, setMenu] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -24,10 +27,11 @@ export default function SellerDetailPage() {
   useEffect(() => {
     setLoading(true);
     setNotFound(false);
-    Promise.all([getSellerByIdApi(id), getMenuApi(id)])
-      .then(([sellerData, menuData]) => {
+    Promise.all([getSellerByIdApi(id), getMenuApi(id), getSellerReviewsApi(id)])
+      .then(([sellerData, menuData, reviewsData]) => {
         setSeller(sellerData);
         setMenu(menuData);
+        setReviews(reviewsData);
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
@@ -131,10 +135,20 @@ export default function SellerDetailPage() {
         <h1 className="font-serif text-4xl font-bold text-navy mb-1">{seller.name}</h1>
         <p className="text-coral font-medium text-lg mb-4">{seller.cuisine} Cuisine</p>
 
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className="bg-cream border border-border rounded-full px-3 py-1 text-sm text-text-dark">
             📍 {seller.neighbourhood}, Mississauga
           </span>
+          {seller.review_count > 0 ? (
+            <span className="flex items-center gap-1.5 bg-cream border border-border rounded-full px-3 py-1 text-sm text-text-dark">
+              <StarRating value={seller.avg_rating} readOnly size="text-sm" />
+              {seller.avg_rating} ({seller.review_count} review{seller.review_count === 1 ? '' : 's'})
+            </span>
+          ) : (
+            <span className="bg-cream border border-border rounded-full px-3 py-1 text-sm text-text-muted">
+              No reviews yet
+            </span>
+          )}
           {tags.map(tag => <DietaryPill key={tag} tag={tag} />)}
         </div>
 
@@ -247,6 +261,19 @@ export default function SellerDetailPage() {
             >
               {placing ? 'Placing order…' : isBuyer() ? `Place Order — $${cartTotal.toFixed(2)}` : 'Log in as a buyer to order'}
             </button>
+          </div>
+        )}
+
+        {/* Reviews (US-15, US-16) */}
+        <hr className="border-border mb-8" />
+        <h2 className="font-serif text-2xl font-bold text-navy mb-4">
+          Reviews {seller.review_count > 0 && `(${seller.review_count})`}
+        </h2>
+        {reviews.length === 0 ? (
+          <p className="text-text-muted">No reviews yet — be the first to order and leave one!</p>
+        ) : (
+          <div className="space-y-3">
+            {reviews.map(review => <ReviewCard key={review.id} review={review} />)}
           </div>
         )}
       </div>

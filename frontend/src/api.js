@@ -175,3 +175,16 @@ export function getOrderByIdApi(token, orderId) {
     headers: authHeaders(token),
   });
 }
+
+// ── Reviews & Ratings (US-15, US-16) ──────────────────────────────────────────
+export function submitReviewApi(token, { order_id, rating, review_text }) {
+  return apiFetch('/api/reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
+    body: JSON.stringify({ order_id, rating, review_text }),
+  });
+}
+
+export function getSellerReviewsApi(sellerId) {
+  return apiFetch(`/api/sellers/${sellerId}/reviews`);
+}

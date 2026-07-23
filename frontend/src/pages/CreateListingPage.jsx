@@ -1,8 +1,11 @@
-// CreateListingPage.jsx — Seller profile creation (US-02)
+// CreateListingPage.jsx — Seller profile creation (US-02) and, in edit mode, US-17.
+// POST /api/sellers is an UPSERT keyed on the logged-in seller's own row, so the
+// exact same form + submit call works for both "create my first listing" and
+// "edit my existing listing" — only the pre-fill and labels differ.
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, isLoggedIn } from '../auth';
-import { createListingApi } from '../api';
+import { createListingApi, getMeApi, photoUrl } from '../api';
 
 const NEIGHBOURHOODS = [
   'Square One', 'Streetsville', 'Port Credit', 'Erin Mills',
@@ -17,21 +20,41 @@ const DIETARY_OPTIONS = [
   { value: 'gluten-free', label: '🌾 Gluten-Free' },
 ];
 
-export default function CreateListingPage() {
+export default function CreateListingPage({ isEditing = false }) {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', cuisine: '', neighbourhood: '', description: '', dietary_tags: [],
   });
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState(null);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(isEditing);
 
   // Require login
   useEffect(() => {
     if (!isLoggedIn()) navigate('/login');
   }, [navigate]);
+
+  // Edit mode: load the seller's current data to pre-fill the form.
+  useEffect(() => {
+    if (!isEditing) return;
+    getMeApi(getToken())
+      .then(me => {
+        setForm({
+          name: me.name || '',
+          cuisine: me.cuisine || '',
+          neighbourhood: me.neighbourhood || '',
+          description: me.description || '',
+          dietary_tags: me.dietary_tags ? me.dietary_tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        });
+        setExistingPhotoUrl(me.photo_url || null);
+      })
+      .catch(err => setServerError(err.message || 'Could not load your current listing.'))
+      .finally(() => setLoadingExisting(false));
+  }, [isEditing]);
 
   function handleChange(e) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -79,7 +102,7 @@ export default function CreateListingPage() {
       formData.append('neighbourhood', form.neighbourhood);
       formData.append('description', form.description.trim());
       formData.append('dietary_tags', form.dietary_tags.join(','));
-      if (photo) formData.append('photo', photo);
+      if (photo) formData.append('photo', photo); // omitted on edit if unchanged — backend keeps the existing photo
 
       const seller = await createListingApi(getToken(), formData);
       navigate(`/seller/${seller.id}`);
@@ -90,12 +113,26 @@ export default function CreateListingPage() {
     }
   }
 
+  if (loadingExisting) {
+    return (
+      <div className="min-h-screen bg-cream py-10 px-4 flex items-center justify-center">
+        <p className="text-text-muted">Loading your listing…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-cream py-10 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="font-serif text-4xl font-bold text-navy mb-2">Create Your Listing</h1>
-          <p className="text-text-muted">Tell your neighbours what you cook and where to find you</p>
+          <h1 className="font-serif text-4xl font-bold text-navy mb-2">
+            {isEditing ? 'Edit Your Listing' : 'Create Your Listing'}
+          </h1>
+          <p className="text-text-muted">
+            {isEditing
+              ? 'Keep your profile up to date so buyers see the real you'
+              : 'Tell your neighbours what you cook and where to find you'}
+          </p>
         </div>
 
         <div className="bg-card-bg rounded-2xl shadow-lg p-8">
@@ -200,20 +237,31 @@ export default function CreateListingPage() {
             {/* Photo Upload */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
-                Food Photo <span className="text-text-muted font-normal">(optional, max 5MB)</span>
+                Food Photo{' '}
+                <span className="text-text-muted font-normal">
+                  {isEditing ? '(optional — leave blank to keep your current photo)' : '(optional, max 5MB)'}
+                </span>
               </label>
               <div className="flex flex-col gap-3">
-                {photoPreview && (
+                {photoPreview ? (
                   <img
                     src={photoPreview}
                     alt="Preview"
                     className="w-full max-h-48 object-cover rounded-lg border border-border"
                   />
+                ) : (
+                  isEditing && existingPhotoUrl && (
+                    <img
+                      src={photoUrl(existingPhotoUrl)}
+                      alt="Current listing photo"
+                      className="w-full max-h-48 object-cover rounded-lg border border-border"
+                    />
+                  )
                 )}
                 <label className="cursor-pointer border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-coral/50 transition-colors">
                   <span className="text-2xl block mb-1">📷</span>
                   <span className="text-text-muted text-sm">
-                    {photo ? photo.name : 'Click to upload a photo'}
+                    {photo ? photo.name : isEditing ? 'Click to replace photo' : 'Click to upload a photo'}
                   </span>
                   <input
                     type="file"
@@ -230,7 +278,9 @@ export default function CreateListingPage() {
               disabled={loading}
               className="w-full bg-coral text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-500 transition-colors disabled:opacity-60 text-lg"
             >
-              {loading ? 'Publishing listing…' : '🍽️ Publish My Listing'}
+              {loading
+                ? (isEditing ? 'Saving changes…' : 'Publishing listing…')
+                : (isEditing ? '💾 Save Changes' : '🍽️ Publish My Listing')}
             </button>
           </form>
         </div>

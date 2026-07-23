@@ -4,6 +4,7 @@
 // like turning over a menu card at the table.
 import { useNavigate } from 'react-router-dom';
 import DietaryPill from './DietaryPill';
+import StarRating from './StarRating';
 import { photoUrl } from '../api';
 
 export default function SellerCard({ seller }) {
@@ -57,9 +58,21 @@ export default function SellerCard({ seller }) {
         <h3 className="font-serif text-lg font-semibold text-navy leading-tight mb-1 transition-colors group-hover:text-coral">
           {seller.name}
         </h3>
-        <p className="text-text-muted text-sm mb-3 flex items-center gap-1">
+        <p className="text-text-muted text-sm mb-1 flex items-center gap-1">
           <span>📍</span> {seller.neighbourhood}
         </p>
+        <div className="mb-3">
+          {seller.review_count > 0 ? (
+            <div className="flex items-center gap-1.5">
+              <StarRating value={seller.avg_rating} readOnly size="text-xs" />
+              <span className="text-xs text-text-muted">
+                {seller.avg_rating} ({seller.review_count})
+              </span>
+            </div>
+          ) : (
+            <span className="text-xs text-text-muted">No reviews yet</span>
+          )}
+        </div>
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-auto">
             {tags.map(tag => <DietaryPill key={tag} tag={tag} />)}

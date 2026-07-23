@@ -217,10 +217,12 @@ app.get('/api/sellers', (req, res) => {
   }
 
   const sql = `
-    SELECT id, name, cuisine, neighbourhood, dietary_tags, description, photo_url
-    FROM sellers
+    SELECT s.id, s.name, s.cuisine, s.neighbourhood, s.dietary_tags, s.description, s.photo_url,
+      (SELECT ROUND(AVG(rating), 1) FROM reviews WHERE seller_id = s.id) AS avg_rating,
+      (SELECT COUNT(*) FROM reviews WHERE seller_id = s.id) AS review_count
+    FROM sellers s
     WHERE ${conditions.join(' AND ')}
-    ORDER BY created_at DESC
+    ORDER BY s.created_at DESC
   `;
 
   const rows = db.prepare(sql).all(...params);
@@ -246,7 +248,9 @@ app.get('/api/filters', (req, res) => {
 
 app.get('/api/sellers/:id', (req, res) => {
   const row = db.prepare(`
-    SELECT id, name, cuisine, neighbourhood, dietary_tags, description, photo_url
+    SELECT id, name, cuisine, neighbourhood, dietary_tags, description, photo_url,
+      (SELECT ROUND(AVG(rating), 1) FROM reviews WHERE seller_id = sellers.id) AS avg_rating,
+      (SELECT COUNT(*) FROM reviews WHERE seller_id = sellers.id) AS review_count
     FROM sellers WHERE id = ?
   `).get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Seller not found' });
@@ -532,6 +536,55 @@ app.get('/api/orders/:id', authMiddleware, (req, res) => {
   const review = db.prepare('SELECT * FROM reviews WHERE order_id = ?').get(order.id);
 
   res.json({ ...order, items, seller, buyer, review: review || null });
+});
+
+// ── Sprint 3: Reviews & Ratings (US-15, US-16) ────────────────────────────────
+
+// Buyer: leave a review for a delivered order. One review per order, enforced
+// both by the app logic below AND the reviews.order_id UNIQUE constraint.
+app.post('/api/reviews', authMiddleware, requireBuyer, (req, res) => {
+  const { order_id, rating, review_text } = req.body;
+
+  const ratingNum = Number(rating);
+  if (!order_id || !Number.isInteger(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+    return res.status(400).json({ error: 'order_id and a rating from 1-5 are required' });
+  }
+
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(order_id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (order.buyer_id !== req.user.id) return res.status(403).json({ error: 'Not your order' });
+  if (order.status !== 'Delivered') {
+    return res.status(400).json({ error: 'You can only review an order after it has been delivered' });
+  }
+
+  const existing = db.prepare('SELECT id FROM reviews WHERE order_id = ?').get(order_id);
+  if (existing) return res.status(400).json({ error: 'You already reviewed this order' });
+
+  try {
+    const result = db.prepare(`
+      INSERT INTO reviews (order_id, seller_id, buyer_id, rating, review_text)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(order_id, order.seller_id, req.user.id, ratingNum, (review_text || '').trim() || null);
+
+    const created = db.prepare('SELECT * FROM reviews WHERE id = ?').get(result.lastInsertRowid);
+    res.json(created);
+  } catch (err) {
+    // Covers the rare race where two tabs submit at once and the UNIQUE constraint fires.
+    console.error(err);
+    res.status(400).json({ error: 'You already reviewed this order' });
+  }
+});
+
+// Public: list all reviews for a seller, most recent first, with the reviewer's name attached.
+app.get('/api/sellers/:id/reviews', (req, res) => {
+  const reviews = db.prepare(`
+    SELECT r.id, r.rating, r.review_text, r.created_at, b.name AS buyer_name
+    FROM reviews r
+    JOIN buyers b ON b.id = r.buyer_id
+    WHERE r.seller_id = ?
+    ORDER BY r.created_at DESC
+  `).all(req.params.id);
+  res.json(reviews);
 });
 
 // ── Start server ──────────────────────────────────────────────────────────────

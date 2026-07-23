@@ -71,6 +71,7 @@ export default function Navbar() {
           {loggedIn && isSeller() && (
             <>
               {seller?.id && <Link to={`/seller/${seller.id}`} className="nav-link pb-1">My Listing</Link>}
+              <Link to="/seller/edit-profile" className="nav-link pb-1">Edit Listing</Link>
               <Link to="/seller/menu" className="nav-link pb-1">My Menu</Link>
               <Link to="/seller/dashboard" className="nav-link pb-1">Orders</Link>
               <Button variant="primary" onClick={handleLogout} className="!px-4 !py-2 text-sm">
@@ -130,6 +131,7 @@ export default function Navbar() {
             {loggedIn && isSeller() && (
               <>
                 {seller?.id && <Link to={`/seller/${seller.id}`} className="py-2.5 hover:text-coral transition-colors">My Listing</Link>}
+                <Link to="/seller/edit-profile" className="py-2.5 hover:text-coral transition-colors">Edit Listing</Link>
                 <Link to="/seller/menu" className="py-2.5 hover:text-coral transition-colors">My Menu</Link>
                 <Link to="/seller/dashboard" className="py-2.5 hover:text-coral transition-colors">Orders</Link>
                 <Button variant="primary" onClick={handleLogout} className="mt-2 w-full">Logout</Button>
