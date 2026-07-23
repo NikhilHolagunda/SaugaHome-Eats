@@ -109,6 +109,48 @@ h1, h2, h3, h4, h5, h6 {
     left: 0;
     width: 100%;
   }
+
+  /* Hero illustration: steam wisps rising from a bowl (US-03 hero enhancement) */
+  .steam-wisp {
+    animation: steamRise 3.5s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+  @keyframes steamRise {
+    0%   { opacity: 0;   transform: translateY(0) scaleX(1); }
+    25%  { opacity: 0.55; }
+    100% { opacity: 0;   transform: translateY(-46px) scaleX(1.5); }
+  }
+
+  /* Hero illustration: food icons drifting upward and fading, staggered by delay */
+  .food-float {
+    animation: foodFloat 6.5s ease-in-out infinite;
+  }
+  @keyframes foodFloat {
+    0%   { opacity: 0; transform: translateY(24px) rotate(-8deg); }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-110px) rotate(8deg); }
+  }
+
+  /* Generic scroll-triggered entrance — paired with an IntersectionObserver hook */
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Success flourish — a brief celebratory pop, used after placing an order / submitting a review */
+  .success-pop {
+    animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes successPop {
+    0%   { opacity: 0; transform: scale(0.9) translateY(8px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

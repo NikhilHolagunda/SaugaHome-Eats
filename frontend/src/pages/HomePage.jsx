@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SellerCard from '../components/SellerCard';
 import Button from '../components/Button';
+import HeroFoodIllustration from '../components/HeroFoodIllustration';
+import PersonalizedHomeBanner from '../components/PersonalizedHomeBanner';
 import { getSellersApi, getFiltersApi } from '../api';
 
 const DIETARY_OPTIONS = ['halal', 'vegetarian', 'vegan', 'gluten-free'];
@@ -85,6 +87,7 @@ export default function HomePage() {
       <section className="bg-gradient-to-br from-navy via-navy/95 to-navy/80 text-white py-20 px-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-coral/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+        <HeroFoodIllustration />
 
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <span className="inline-block bg-coral/20 text-coral border border-coral/30 rounded-full px-4 py-1 text-sm font-medium mb-6">
@@ -106,6 +109,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <PersonalizedHomeBanner />
 
       {/* ── Stats bar ───────────────────────────────────────────────────── */}
       {!loading && !error && (
