@@ -8,6 +8,9 @@ const STATUS_STYLES = {
   Placed: 'bg-amber-50 text-amber-700',
   Accepted: 'bg-emerald-50 text-emerald-700',
   Declined: 'bg-red-50 text-red-700',
+  Preparing: 'bg-blue-50 text-blue-700',
+  'Out for Delivery': 'bg-purple-50 text-purple-700',
+  Delivered: 'bg-green-100 text-green-900',
 };
 
 export default function BuyerOrdersPage() {
@@ -84,6 +87,14 @@ export default function BuyerOrdersPage() {
               </div>
               {order.notes && (
                 <p className="text-text-muted text-sm mt-2 italic">"{order.notes}"</p>
+              )}
+              {order.status !== 'Declined' && (
+                <Link
+                  to={`/order/${order.id}`}
+                  className="inline-block mt-3 text-sm font-semibold text-coral hover:text-red-500 transition-colors"
+                >
+                  Track this order →
+                </Link>
               )}
             </div>
           ))}

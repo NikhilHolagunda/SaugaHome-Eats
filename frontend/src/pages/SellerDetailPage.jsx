@@ -16,6 +16,7 @@ export default function SellerDetailPage() {
 
   const [cart, setCart] = useState({});
   const [notes, setNotes] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(null);
@@ -55,6 +56,10 @@ export default function SellerDetailPage() {
       return;
     }
     if (cartItems.length === 0) return;
+    if (!deliveryAddress.trim()) {
+      setOrderError('Please enter a delivery address so we can show your order on the map.');
+      return;
+    }
 
     setPlacing(true);
     try {
@@ -62,10 +67,12 @@ export default function SellerDetailPage() {
         seller_id: seller.id,
         items: cartItems.map(i => ({ menu_item_id: i.id, quantity: i.quantity })),
         notes: notes.trim() || undefined,
+        delivery_address: deliveryAddress.trim(),
       });
       setOrderSuccess(order);
       setCart({});
       setNotes('');
+      setDeliveryAddress('');
     } catch (err) {
       setOrderError(err.message);
     } finally {
@@ -207,6 +214,17 @@ export default function SellerDetailPage() {
               <span>Total</span>
               <span>${cartTotal.toFixed(2)}</span>
             </div>
+
+            <label className="block text-sm font-semibold text-navy mb-1">
+              Delivery address
+            </label>
+            <input
+              type="text"
+              value={deliveryAddress}
+              onChange={e => setDeliveryAddress(e.target.value)}
+              placeholder="e.g. 123 Main St, Mississauga, ON"
+              className="w-full p-3 border border-border rounded-lg bg-white text-text-dark placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-coral/50 mb-4"
+            />
 
             <textarea
               value={notes}

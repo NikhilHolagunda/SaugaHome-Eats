@@ -75,9 +75,41 @@ db.exec(`
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (menu_item_id) REFERENCES menu_items(id)
   );
+
+  CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL UNIQUE,
+    seller_id INTEGER NOT NULL,
+    buyer_id INTEGER NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    review_text TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (seller_id) REFERENCES sellers(id),
+    FOREIGN KEY (buyer_id) REFERENCES buyers(id)
+  );
 `);
 
+// ── Sprint 3 migration: add tracking columns to orders if they don't exist yet ──
+// SQLite has no "ADD COLUMN IF NOT EXISTS", so check pragma table_info first.
+// This keeps the migration safe to re-run and non-destructive to existing rows.
+const orderColumns = db.prepare(`PRAGMA table_info(orders)`).all().map(c => c.name);
+const sprint3Columns = [
+  ['seller_lat', 'REAL'],
+  ['seller_lng', 'REAL'],
+  ['buyer_lat', 'REAL'],
+  ['buyer_lng', 'REAL'],
+  ['delivery_address', 'TEXT'],
+  ['status_updated_at', 'DATETIME'],
+];
+for (const [col, type] of sprint3Columns) {
+  if (!orderColumns.includes(col)) {
+    db.exec(`ALTER TABLE orders ADD COLUMN ${col} ${type}`);
+    console.log(`Migration: added orders.${col} (${type})`);
+  }
+}
+
 console.log('Database connected:', DB_PATH);
-console.log('Tables ready: sellers, buyers, sessions, menu_items, orders, order_items');
+console.log('Tables ready: sellers, buyers, sessions, menu_items, orders, order_items, reviews');
 
 module.exports = db;

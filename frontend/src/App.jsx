@@ -15,6 +15,7 @@ import BuyerLoginPage from './pages/BuyerLoginPage';
 import SellerMenuPage from './pages/SellerMenuPage';
 import BuyerOrdersPage from './pages/BuyerOrdersPage';
 import SellerOrdersPage from './pages/SellerOrdersPage';
+import OrderTrackingPage from './pages/OrderTrackingPage';
 
 export default function App() {
   return (
@@ -49,6 +50,12 @@ export default function App() {
             <Route
               path="/seller/dashboard"
               element={<ProtectedRoute role="seller"><SellerOrdersPage /></ProtectedRoute>}
+            />
+
+            {/* Sprint 3 US-11 — order tracking (buyer or seller, ownership checked server-side) */}
+            <Route
+              path="/order/:id"
+              element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>}
             />
 
             <Route path="*" element={<NotFound />} />

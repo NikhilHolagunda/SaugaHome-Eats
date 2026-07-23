@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 
 const db = require('./database');
+const { geocode } = require('./geocode');
 const app = express();
 const PORT = 3000;
 
@@ -372,14 +373,17 @@ app.delete('/api/menu/:id', authMiddleware, requireSeller, (req, res) => {
 
 // Buyer: place an order
 // Body: { seller_id, items: [{ menu_item_id, quantity }], notes }
-app.post('/api/orders', authMiddleware, requireBuyer, (req, res) => {
+app.post('/api/orders', authMiddleware, requireBuyer, async (req, res) => {
   try {
-    const { seller_id, items, notes } = req.body;
+    const { seller_id, items, notes, delivery_address } = req.body;
     if (!seller_id || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'seller_id and at least one item are required' });
     }
+    if (!delivery_address || !delivery_address.trim()) {
+      return res.status(400).json({ error: 'delivery_address is required so we can show the delivery route' });
+    }
 
-    const seller = db.prepare('SELECT id FROM sellers WHERE id = ?').get(seller_id);
+    const seller = db.prepare('SELECT id, neighbourhood FROM sellers WHERE id = ?').get(seller_id);
     if (!seller) return res.status(400).json({ error: 'Seller not found' });
 
     // Look up each menu item's real price from the DB (never trust client prices).
@@ -406,10 +410,16 @@ app.post('/api/orders', authMiddleware, requireBuyer, (req, res) => {
       totalPrice += menuItem.price * Math.floor(it.quantity);
     }
 
+    // Geocode seller + delivery address once, up front (US-12). Nominatim is
+    // rate-limited to 1 req/sec, so these two calls run sequentially (~1s total).
+    // A failed geocode doesn't block the order — the map just won't render for it.
+    const sellerCoords = await geocode(seller.neighbourhood);
+    const buyerCoords = await geocode(delivery_address);
+
     // Insert order + items atomically
     const insertOrder = db.prepare(`
-      INSERT INTO orders (buyer_id, seller_id, status, total_price, notes)
-      VALUES (?, ?, 'Placed', ?, ?)
+      INSERT INTO orders (buyer_id, seller_id, status, total_price, notes, delivery_address, seller_lat, seller_lng, buyer_lat, buyer_lng)
+      VALUES (?, ?, 'Placed', ?, ?, ?, ?, ?, ?, ?)
     `);
     const insertItem = db.prepare(`
       INSERT INTO order_items (order_id, menu_item_id, item_name, quantity, unit_price)
@@ -417,7 +427,11 @@ app.post('/api/orders', authMiddleware, requireBuyer, (req, res) => {
     `);
 
     const tx = db.transaction(() => {
-      const result = insertOrder.run(req.user.id, seller_id, totalPrice, notes || null);
+      const result = insertOrder.run(
+        req.user.id, seller_id, totalPrice, notes || null, delivery_address.trim(),
+        sellerCoords?.lat ?? null, sellerCoords?.lng ?? null,
+        buyerCoords?.lat ?? null, buyerCoords?.lng ?? null
+      );
       const orderId = result.lastInsertRowid;
       for (const ri of resolvedItems) {
         insertItem.run(orderId, ri.menu_item_id, ri.item_name, ri.quantity, ri.unit_price);
@@ -466,25 +480,58 @@ app.get('/api/orders/buyer', authMiddleware, requireBuyer, (req, res) => {
   res.json(hydrateOrders(orders, 'seller'));
 });
 
-// Seller: accept or decline an order
-// Body: { status: 'Accepted' | 'Declined' }
+// ── Sprint 3: full order status lifecycle (US-11, US-14) ─────────────────────
+// Placed -> Accepted -> Preparing -> Out for Delivery -> Delivered
+// Placed -> Declined (terminal)
+// Each key lists the ONLY statuses that are legal next steps from it.
+const STATUS_TRANSITIONS = {
+  'Placed': ['Accepted', 'Declined'],
+  'Accepted': ['Preparing'],
+  'Preparing': ['Out for Delivery'],
+  'Out for Delivery': ['Delivered'],
+  'Delivered': [],
+  'Declined': [],
+};
+
+// Seller: advance an order's status (accept/decline, then move it through prep -> delivery)
+// Body: { status: '<one of the values above>' }
 app.patch('/api/orders/:id/status', authMiddleware, requireSeller, (req, res) => {
   const { status } = req.body;
-  const allowed = ['Accepted', 'Declined'];
-  if (!allowed.includes(status)) {
-    return res.status(400).json({ error: `Status must be one of: ${allowed.join(', ')}` });
-  }
-
   const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   if (!order) return res.status(404).json({ error: 'Order not found' });
   if (order.seller_id !== req.user.id) return res.status(403).json({ error: 'Not your order' });
-  if (order.status !== 'Placed') {
-    return res.status(400).json({ error: `Order is already ${order.status}` });
+
+  const legalNext = STATUS_TRANSITIONS[order.status] || [];
+  if (!legalNext.includes(status)) {
+    return res.status(400).json({
+      error: legalNext.length
+        ? `From "${order.status}", status must be one of: ${legalNext.join(', ')}`
+        : `Order is already ${order.status} and cannot be changed further`,
+    });
   }
 
-  db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, req.params.id);
+  db.prepare('UPDATE orders SET status = ?, status_updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+    .run(status, req.params.id);
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   res.json(updated);
+});
+
+// Get a single order's full detail (buyer or seller who owns it) — powers the tracking page (US-11)
+app.get('/api/orders/:id', authMiddleware, (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+
+  const isOwner =
+    (req.userType === 'buyer' && order.buyer_id === req.user.id) ||
+    (req.userType === 'seller' && order.seller_id === req.user.id);
+  if (!isOwner) return res.status(403).json({ error: 'Not your order' });
+
+  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+  const seller = db.prepare('SELECT id, name, cuisine, neighbourhood, photo_url FROM sellers WHERE id = ?').get(order.seller_id);
+  const buyer = db.prepare('SELECT id, email, name FROM buyers WHERE id = ?').get(order.buyer_id);
+  const review = db.prepare('SELECT * FROM reviews WHERE order_id = ?').get(order.id);
+
+  res.json({ ...order, items, seller, buyer, review: review || null });
 });
 
 // ── Start server ──────────────────────────────────────────────────────────────

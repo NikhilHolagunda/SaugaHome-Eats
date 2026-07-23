@@ -140,11 +140,11 @@ export function deleteMenuItemApi(token, id) {
 }
 
 // ── Orders ─────────────────────────────────────────────────────────────────
-export function placeOrderApi(token, { seller_id, items, notes }) {
+export function placeOrderApi(token, { seller_id, items, notes, delivery_address }) {
   return apiFetch('/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ seller_id, items, notes }),
+    body: JSON.stringify({ seller_id, items, notes, delivery_address }),
   });
 }
 
@@ -161,5 +161,17 @@ export function updateOrderStatusApi(token, orderId, status) {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
     body: JSON.stringify({ status }),
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPRINT 3 — new endpoints
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Get a single order's full detail — used by the tracking page (US-11).
+// Works for either the buyer or seller who owns the order.
+export function getOrderByIdApi(token, orderId) {
+  return apiFetch(`/api/orders/${orderId}`, {
+    headers: authHeaders(token),
   });
 }
