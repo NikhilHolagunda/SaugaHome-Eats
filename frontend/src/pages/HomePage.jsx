@@ -1,5 +1,5 @@
 // HomePage.jsx — Browse all sellers with search + filters (US-03, US-05, US-06, US-07, US-08)
-// plus the neighbourhood discovery map (US-18).
+// plus the neighbourhood discovery map (US-18) at the foot of the page.
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SellerCard from '../components/SellerCard';
 import Button from '../components/Button';
@@ -186,29 +186,9 @@ export default function HomePage() {
 
       <PersonalizedHomeBanner />
 
-      {/* ── Neighbourhood discovery map (US-18) ─────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-4 pt-12 pb-2 w-full">
-        <div className="text-center mb-6">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-navy mb-2">
-            Find cooks in your neighbourhood
-          </h2>
-          <p className="text-text-muted">
-            Mississauga's home kitchens, mapped. Tap a pin to see who's cooking nearby.
-          </p>
-        </div>
-        <NeighbourhoodMap
-          sellers={allSellers}
-          activeNeighbourhood={neighbourhood}
-          onSelect={(name) => {
-            setNeighbourhood(name);
-            gridRef.current?.scrollIntoView({ behavior: 'smooth' });
-          }}
-        />
-      </section>
-
       {/* ── Stats bar ───────────────────────────────────────────────────── */}
       {!loading && !error && (
-        <div className="bg-gold/10 border-y border-gold/20 py-4 px-4 mt-12">
+        <div className="bg-gold/10 border-y border-gold/20 py-4 px-4">
           <p className="text-center text-navy font-medium">
             🍽️ {sellers.length} home cook{sellers.length !== 1 ? 's' : ''}
             {hasActiveFilters ? ' match your filters' : ' listed in Mississauga'}
@@ -358,6 +338,30 @@ export default function HomePage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* ── Neighbourhood discovery map (US-18) ─────────────────────────── */}
+      {/* Sits below the listings: browse first, then explore by area. Clicking
+          a pin filters the grid above, so we scroll back up to it. */}
+      <section className="bg-white border-t border-border py-14 px-4">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="text-center mb-6">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-navy mb-2">
+              Find cooks in your neighbourhood
+            </h2>
+            <p className="text-text-muted">
+              Mississauga's home kitchens, mapped. Tap a pin to filter the listings above.
+            </p>
+          </div>
+          <NeighbourhoodMap
+            sellers={allSellers}
+            activeNeighbourhood={neighbourhood}
+            onSelect={(name) => {
+              setNeighbourhood(name);
+              gridRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          />
+        </div>
       </section>
     </div>
   );
