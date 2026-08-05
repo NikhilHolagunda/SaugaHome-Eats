@@ -7,6 +7,7 @@ import { getToken, isBuyer } from '../auth';
 import OrderStatusTimeline from '../components/OrderStatusTimeline';
 import DeliveryMap from '../components/DeliveryMap';
 import StarRating from '../components/StarRating';
+import BackButton from '../components/BackButton';
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -115,9 +116,14 @@ export default function OrderTrackingPage() {
     return () => clearInterval(interval);
   }, [load]);
 
+  // Buyers came from their orders list; sellers came from their dashboard.
+  const backTo = isBuyer() ? '/buyer/orders' : '/seller/dashboard';
+  const backLabel = isBuyer() ? 'Back to my orders' : 'Back to dashboard';
+
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10">
+        <BackButton to={backTo} label={backLabel} />
         <div className="skeleton h-8 w-1/2 mb-6" />
         <div className="skeleton h-24 w-full mb-6" />
         <div className="skeleton h-40 w-full" />
@@ -127,13 +133,16 @@ export default function OrderTrackingPage() {
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="text-5xl mb-4">🔍</div>
-        <h1 className="font-serif text-3xl font-bold text-navy mb-2">Can't show this order</h1>
-        <p className="text-text-muted mb-6">{error}</p>
-        <Link to="/" className="bg-coral text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-500 transition-colors inline-block">
-          Back to home
-        </Link>
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <BackButton to={backTo} label={backLabel} />
+        <div className="text-center py-10">
+          <div className="text-5xl mb-4">🔍</div>
+          <h1 className="font-serif text-3xl font-bold text-navy mb-2">Can't show this order</h1>
+          <p className="text-text-muted mb-6">{error}</p>
+          <Link to="/" className="bg-coral text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-500 transition-colors inline-block">
+            Back to home
+          </Link>
+        </div>
       </div>
     );
   }
@@ -144,6 +153,8 @@ export default function OrderTrackingPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10 w-full">
+      <BackButton to={backTo} label={backLabel} />
+
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
           <h1 className="font-serif text-3xl md:text-4xl font-bold text-navy mb-1">

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { getSellerOrdersApi, updateOrderStatusApi } from '../api';
 import { getToken } from '../auth';
 import Button from '../components/Button';
+import BackButton from '../components/BackButton';
 
 const STATUS_STYLES = {
   Placed:    { bg: 'bg-gold/10',   text: 'text-navy',       border: 'border-gold/40'  },
@@ -172,6 +173,7 @@ export default function SellerOrdersPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 w-full">
+      <BackButton to="/" label="Back to home" />
       <div className="mb-8">
         <h1 className="font-serif text-4xl font-bold text-navy mb-2">Order Dashboard</h1>
         <p className="text-text-muted">

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, isLoggedIn } from '../auth';
 import { createListingApi, getMeApi, photoUrl } from '../api';
+import BackButton from '../components/BackButton';
 
 const NEIGHBOURHOODS = [
   'Square One', 'Streetsville', 'Port Credit', 'Erin Mills',
@@ -115,8 +116,11 @@ export default function CreateListingPage({ isEditing = false }) {
 
   if (loadingExisting) {
     return (
-      <div className="min-h-screen bg-cream py-10 px-4 flex items-center justify-center">
-        <p className="text-text-muted">Loading your listing…</p>
+      <div className="min-h-screen bg-cream py-10 px-4">
+        <div className="max-w-2xl mx-auto">
+          <BackButton to="/" label="Back to home" />
+          <p className="text-text-muted text-center">Loading your listing…</p>
+        </div>
       </div>
     );
   }
@@ -124,6 +128,8 @@ export default function CreateListingPage({ isEditing = false }) {
   return (
     <div className="min-h-screen bg-cream py-10 px-4">
       <div className="max-w-2xl mx-auto">
+        <BackButton to="/" label="Back to home" />
+
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl font-bold text-navy mb-2">
             {isEditing ? 'Edit Your Listing' : 'Create Your Listing'}

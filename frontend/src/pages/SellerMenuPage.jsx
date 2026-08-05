@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { getToken, getSeller } from '../auth';
 import { getMenuApi, addMenuItemApi, updateMenuItemApi, deleteMenuItemApi } from '../api';
+import BackButton from '../components/BackButton';
 
 export default function SellerMenuPage() {
   const seller = getSeller();
@@ -72,6 +73,8 @@ export default function SellerMenuPage() {
   return (
     <div className="min-h-screen bg-cream py-10 px-4">
       <div className="max-w-3xl mx-auto">
+        <BackButton to="/seller/dashboard" label="Back to dashboard" />
+
         <h1 className="font-serif text-4xl font-bold text-navy mb-2">My Menu</h1>
         <p className="text-text-muted mb-8">Add dishes so buyers can order from you.</p>
 

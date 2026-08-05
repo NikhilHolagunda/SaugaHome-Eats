@@ -1,4 +1,4 @@
-// server.js — SaugaHomeEats Express API (Sprint 2)
+// server.js — SaugaHomeEats Express API (Sprint 3)
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -61,6 +61,37 @@ function requireSeller(req, res, next) {
 function requireBuyer(req, res, next) {
   if (req.userType !== 'buyer') return res.status(403).json({ error: 'Buyers only' });
   next();
+}
+
+// ── Geocoding helper (US-12) ──────────────────────────────────────────────────
+// Nominatim needs city/province context or it returns nothing for a bare street
+// address like "658 Macbeth Heights". We append Mississauga context unless the
+// buyer already typed it, then fall back to a looser query if the first misses.
+async function geocodeInMississauga(raw) {
+  if (!raw || !raw.trim()) return null;
+  const text = raw.trim();
+  const lower = text.toLowerCase();
+
+  const attempts = [];
+  if (lower.includes('mississauga')) {
+    attempts.push(text.includes('Ontario') || lower.includes(', on') ? text : `${text}, Ontario, Canada`);
+  } else {
+    attempts.push(`${text}, Mississauga, Ontario, Canada`);
+  }
+  // Looser retry: drop the unit/street number, which is the part Nominatim
+  // most often fails on for residential addresses it doesn't have indexed.
+  const withoutNumber = text.replace(/^[\d\-#\s]+/, '').trim();
+  if (withoutNumber && withoutNumber !== text) {
+    attempts.push(`${withoutNumber}, Mississauga, Ontario, Canada`);
+  }
+
+  for (const query of attempts) {
+    const coords = await geocode(query);
+    if (coords && coords.lat != null && coords.lng != null) return coords;
+    // Nominatim rate limit: 1 request/second.
+    await new Promise(r => setTimeout(r, 1100));
+  }
+  return null;
 }
 
 // ── Health check ──────────────────────────────────────────────────────────────
@@ -376,7 +407,7 @@ app.delete('/api/menu/:id', authMiddleware, requireSeller, (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Buyer: place an order
-// Body: { seller_id, items: [{ menu_item_id, quantity }], notes }
+// Body: { seller_id, items: [{ menu_item_id, quantity }], notes, delivery_address }
 app.post('/api/orders', authMiddleware, requireBuyer, async (req, res) => {
   try {
     const { seller_id, items, notes, delivery_address } = req.body;
@@ -414,11 +445,23 @@ app.post('/api/orders', authMiddleware, requireBuyer, async (req, res) => {
       totalPrice += menuItem.price * Math.floor(it.quantity);
     }
 
-    // Geocode seller + delivery address once, up front (US-12). Nominatim is
-    // rate-limited to 1 req/sec, so these two calls run sequentially (~1s total).
-    // A failed geocode doesn't block the order — the map just won't render for it.
-    const sellerCoords = await geocode(seller.neighbourhood);
-    const buyerCoords = await geocode(delivery_address);
+    // Geocode the delivery address FIRST (US-12). If we can't place it on the
+    // map, stop and let the buyer correct it rather than saving an order whose
+    // tracking page will show an empty map.
+    const buyerCoords = await geocodeInMississauga(delivery_address);
+    if (!buyerCoords) {
+      return res.status(400).json({
+        error: "We couldn't find that address in Mississauga. Please include the street number, street name and city — for example: 100 City Centre Dr, Mississauga, ON",
+      });
+    }
+
+    // Seller location comes from their neighbourhood. If this misses we still
+    // accept the order — it's our data problem, not the buyer's — and the map
+    // component shows its own fallback message.
+    const sellerCoords = await geocodeInMississauga(seller.neighbourhood);
+    if (!sellerCoords) {
+      console.warn(`Could not geocode seller ${seller.id} neighbourhood: "${seller.neighbourhood}"`);
+    }
 
     // Insert order + items atomically
     const insertOrder = db.prepare(`
@@ -434,7 +477,7 @@ app.post('/api/orders', authMiddleware, requireBuyer, async (req, res) => {
       const result = insertOrder.run(
         req.user.id, seller_id, totalPrice, notes || null, delivery_address.trim(),
         sellerCoords?.lat ?? null, sellerCoords?.lng ?? null,
-        buyerCoords?.lat ?? null, buyerCoords?.lng ?? null
+        buyerCoords.lat, buyerCoords.lng
       );
       const orderId = result.lastInsertRowid;
       for (const ri of resolvedItems) {

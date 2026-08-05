@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signupBuyerApi } from '../api';
 import { saveBuyerSession } from '../auth';
+import BackButton from '../components/BackButton';
 
 export default function BuyerSignupPage() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function BuyerSignupPage() {
     setSubmitting(true);
     try {
       const res = await signupBuyerApi({ email, password, name: name || null });
-    saveBuyerSession(res.token, { id: res.id, email: res.email, name: res.name });
+      saveBuyerSession(res.token, { id: res.id, email: res.email, name: res.name });
       navigate('/');
     } catch (err) {
       setError(err.message);
@@ -33,7 +34,11 @@ export default function BuyerSignupPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <BackButton to="/" label="Back to home" />
+      </div>
+
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h1 className="font-serif text-3xl font-bold text-navy mb-2">Sign up as a Buyer</h1>
         <p className="text-gray-500 mb-6">Discover home cooks in your neighbourhood.</p>

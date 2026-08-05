@@ -6,6 +6,7 @@ import { isBuyer, getToken } from '../auth';
 import DietaryPill from '../components/DietaryPill';
 import StarRating from '../components/StarRating';
 import ReviewCard from '../components/ReviewCard';
+import BackButton from '../components/BackButton';
 
 export default function SellerDetailPage() {
   const { id } = useParams();
@@ -86,10 +87,15 @@ export default function SellerDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-text-muted">
-        <div className="text-center">
-          <div className="text-4xl mb-4 animate-pulse">🍽️</div>
-          <p>Loading listing…</p>
+      <div className="min-h-screen bg-cream">
+        <div className="max-w-4xl mx-auto px-4 pt-6">
+          <BackButton to="/" label="Back to all sellers" />
+        </div>
+        <div className="flex items-center justify-center text-text-muted pt-16">
+          <div className="text-center">
+            <div className="text-4xl mb-4 animate-pulse">🍽️</div>
+            <p>Loading listing…</p>
+          </div>
         </div>
       </div>
     );
@@ -97,13 +103,18 @@ export default function SellerDetailPage() {
 
   if (notFound || !seller) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="font-serif text-3xl font-bold text-navy mb-3">Seller not found</h1>
-          <p className="text-text-muted mb-6">This listing doesn't exist or may have been removed.</p>
-          <Link to="/" className="bg-coral text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-500 transition-colors inline-block">
-            ← Back to home
-          </Link>
+      <div className="min-h-screen bg-cream">
+        <div className="max-w-4xl mx-auto px-4 pt-6">
+          <BackButton to="/" label="Back to all sellers" />
+        </div>
+        <div className="flex items-center justify-center px-4 pt-16">
+          <div className="text-center">
+            <h1 className="font-serif text-3xl font-bold text-navy mb-3">Seller not found</h1>
+            <p className="text-text-muted mb-6">This listing doesn't exist or may have been removed.</p>
+            <Link to="/" className="bg-coral text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-500 transition-colors inline-block">
+              ← Back to home
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -114,12 +125,10 @@ export default function SellerDetailPage() {
   return (
     <div className="min-h-screen bg-cream pb-16">
       <div className="max-w-4xl mx-auto px-4 pt-6">
-        <Link to="/" className="text-navy hover:text-coral transition-colors text-sm font-medium">
-          ← Back to all sellers
-        </Link>
+        <BackButton to="/" label="Back to all sellers" />
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 mt-4">
+      <div className="max-w-4xl mx-auto px-4">
         <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-gray-100 shadow-md">
           {seller.photo_url ? (
             <img src={photoUrl(seller.photo_url)} alt={seller.name} className="w-full h-full object-cover" />

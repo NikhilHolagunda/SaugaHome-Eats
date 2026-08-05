@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginBuyerApi } from '../api';
 import { saveBuyerSession } from '../auth';
+import BackButton from '../components/BackButton';
 
 export default function BuyerLoginPage() {
   const navigate = useNavigate();
@@ -27,7 +28,10 @@ export default function BuyerLoginPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <BackButton to="/" label="Back to home" />
+      </div>
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h1 className="font-serif text-3xl font-bold text-navy mb-2">Buyer Log in</h1>
         <p className="text-gray-500 mb-6">Welcome back.</p>

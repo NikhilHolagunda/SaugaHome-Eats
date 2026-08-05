@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getToken } from '../auth';
 import { getBuyerOrdersApi, photoUrl } from '../api';
+import BackButton from '../components/BackButton';
 
 const STATUS_STYLES = {
   Placed: 'bg-amber-50 text-amber-700',
@@ -28,6 +29,8 @@ export default function BuyerOrdersPage() {
   return (
     <div className="min-h-screen bg-cream py-10 px-4">
       <div className="max-w-3xl mx-auto">
+        <BackButton to="/" label="Back to home" />
+
         <h1 className="font-serif text-4xl font-bold text-navy mb-2">My Orders</h1>
         <p className="text-text-muted mb-8">Track the status of everything you've ordered.</p>
 

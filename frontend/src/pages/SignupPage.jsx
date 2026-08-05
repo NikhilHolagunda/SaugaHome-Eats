@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signupApi } from '../api';
 import { saveSellerSession } from '../auth';
+import BackButton from '../components/BackButton';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -48,7 +49,10 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <BackButton to="/" label="Back to home" />
+      </div>
       <div className="bg-card-bg rounded-2xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <span className="text-4xl">🍱</span>
