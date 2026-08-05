@@ -1,9 +1,10 @@
 // HomePage.jsx — Browse all sellers with search + filters (US-03, US-05, US-06, US-07, US-08)
+// plus the neighbourhood discovery map (US-18).
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SellerCard from '../components/SellerCard';
 import Button from '../components/Button';
-import HeroFoodIllustration from '../components/HeroFoodIllustration';
 import PersonalizedHomeBanner from '../components/PersonalizedHomeBanner';
+import NeighbourhoodMap from '../components/NeighbourhoodMap';
 import { getSellersApi, getFiltersApi } from '../api';
 
 const DIETARY_OPTIONS = ['halal', 'vegetarian', 'vegan', 'gluten-free'];
@@ -21,11 +22,31 @@ function SkeletonCard() {
   );
 }
 
+// Respects the OS "reduce motion" accessibility setting — shows the poster
+// still image instead of autoplaying video for users who've asked for less
+// animation. Also covers mobile browsers that block autoplay outright.
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(
+    () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (!mq) return;
+    const handler = e => setReduced(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  return reduced;
+}
+
 export default function HomePage() {
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const gridRef = useRef(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   // Filter state
   const [search, setSearch] = useState('');
@@ -35,6 +56,16 @@ export default function HomePage() {
 
   // Dropdown options fetched from backend
   const [filterOptions, setFilterOptions] = useState({ cuisines: [], neighbourhoods: [] });
+
+  // The grid's `sellers` is filtered; the map needs the full unfiltered set so
+  // its pins don't vanish when a filter is active. Fetched once on mount.
+  const [allSellers, setAllSellers] = useState([]);
+
+  useEffect(() => {
+    getSellersApi({})
+      .then(data => setAllSellers(data))
+      .catch(() => { /* non-fatal — the map just won't render */ });
+  }, []);
 
   // Load the filter dropdown options once on mount
   useEffect(() => {
@@ -83,20 +114,63 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-navy via-navy/95 to-navy/80 text-white py-20 px-4 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-coral/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
-        <HeroFoodIllustration />
+      {/* ── Hero with background video ───────────────────────────────────── */}
+      <section className="relative overflow-hidden text-white py-24 md:py-32 px-4">
+        {/* Layer 1: the video (or poster still if reduced motion is preferred) */}
+        {prefersReducedMotion ? (
+          <img
+            src="/hero-poster.jpg"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <video
+            className="absolute inset-0 w-full h-full object-cover"
+            src="/hero.mp4"
+            poster="/hero-poster.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+        )}
+
+        {/* Layer 2: contrast scrims. Kept light overall so the footage stays
+            visible, with the darkness concentrated behind the text block
+            rather than flat across the whole frame. A tight text-shadow on
+            the headline does the rest of the legibility work. */}
+        <div className="absolute inset-0 bg-navy/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-transparent to-navy/70" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 60% at 50% 45%, rgba(30,39,97,0.72) 0%, rgba(30,39,97,0.35) 55%, transparent 80%)',
+          }}
+        />
+
+        {/* Layer 3: coral/gold colour bloom, dialled back so it doesn't add
+            to the blue haze over the footage */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-coral/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
         <div className="max-w-3xl mx-auto text-center relative z-10">
-          <span className="inline-block bg-coral/20 text-coral border border-coral/30 rounded-full px-4 py-1 text-sm font-medium mb-6">
+          <span className="inline-block bg-coral/25 text-white border border-coral/40 rounded-full px-4 py-1 text-sm font-medium mb-6 backdrop-blur-sm">
             🏠 Mississauga's Home Cook Directory
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+          <h1
+            className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight mb-6"
+            style={{ textShadow: '0 2px 20px rgba(15,20,50,0.85), 0 1px 3px rgba(15,20,50,0.9)' }}
+          >
             Authentic home-cooked food, made by your neighbours
           </h1>
-          <p className="text-white/70 text-lg md:text-xl mb-10">
+          <p
+            className="text-white text-lg md:text-xl mb-10"
+            style={{ textShadow: '0 1px 12px rgba(15,20,50,0.9)' }}
+          >
             Discover Mississauga's hidden home cooks — tiffin services, bakers, and caterers right in your neighbourhood.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -112,9 +186,29 @@ export default function HomePage() {
 
       <PersonalizedHomeBanner />
 
+      {/* ── Neighbourhood discovery map (US-18) ─────────────────────────── */}
+      <section className="max-w-6xl mx-auto px-4 pt-12 pb-2 w-full">
+        <div className="text-center mb-6">
+          <h2 className="font-serif text-3xl md:text-4xl font-bold text-navy mb-2">
+            Find cooks in your neighbourhood
+          </h2>
+          <p className="text-text-muted">
+            Mississauga's home kitchens, mapped. Tap a pin to see who's cooking nearby.
+          </p>
+        </div>
+        <NeighbourhoodMap
+          sellers={allSellers}
+          activeNeighbourhood={neighbourhood}
+          onSelect={(name) => {
+            setNeighbourhood(name);
+            gridRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
+      </section>
+
       {/* ── Stats bar ───────────────────────────────────────────────────── */}
       {!loading && !error && (
-        <div className="bg-gold/10 border-y border-gold/20 py-4 px-4">
+        <div className="bg-gold/10 border-y border-gold/20 py-4 px-4 mt-12">
           <p className="text-center text-navy font-medium">
             🍽️ {sellers.length} home cook{sellers.length !== 1 ? 's' : ''}
             {hasActiveFilters ? ' match your filters' : ' listed in Mississauga'}

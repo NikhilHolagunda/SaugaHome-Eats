@@ -6,6 +6,7 @@ import { getSellerOrdersApi, updateOrderStatusApi } from '../api';
 import { getToken } from '../auth';
 import Button from '../components/Button';
 import BackButton from '../components/BackButton';
+import { formatDateTime } from '../utils/date';
 
 const STATUS_STYLES = {
   Placed:    { bg: 'bg-gold/10',   text: 'text-navy',       border: 'border-gold/40'  },
@@ -33,13 +34,7 @@ function StatusBadge({ status }) {
   );
 }
 
-function formatDate(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleString('en-CA', {
-    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
-  });
-}
+
 
 function OrderCard({ order, onAccept, onDecline, onAdvance, actionInFlight }) {
   const items = order.items || [];
@@ -53,7 +48,7 @@ function OrderCard({ order, onAccept, onDecline, onAdvance, actionInFlight }) {
         <div>
           <h3 className="font-serif text-xl font-bold text-navy">Order #{order.id}</h3>
           <p className="text-sm text-text-muted">
-            From <span className="font-medium text-text-dark">{buyerName}</span> · {formatDate(order.created_at)}
+            From <span className="font-medium text-text-dark">{buyerName}</span> · {formatDateTime(order.created_at)}
           </p>
         </div>
         <StatusBadge status={order.status} />

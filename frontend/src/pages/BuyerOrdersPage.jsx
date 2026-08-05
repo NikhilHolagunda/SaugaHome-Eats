@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { getToken } from '../auth';
 import { getBuyerOrdersApi, photoUrl } from '../api';
 import BackButton from '../components/BackButton';
+import { formatDate } from '../utils/date';
 
 const STATUS_STYLES = {
   Placed: 'bg-amber-50 text-amber-700',
@@ -67,7 +68,7 @@ export default function BuyerOrdersPage() {
                       {order.seller?.name || 'Seller'}
                     </Link>
                     <p className="text-text-muted text-xs">
-                      {new Date(order.created_at).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      {formatDate(order.created_at)}
                     </p>
                   </div>
                 </div>

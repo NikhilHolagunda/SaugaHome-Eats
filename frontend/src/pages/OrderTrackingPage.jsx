@@ -8,13 +8,7 @@ import OrderStatusTimeline from '../components/OrderStatusTimeline';
 import DeliveryMap from '../components/DeliveryMap';
 import StarRating from '../components/StarRating';
 import BackButton from '../components/BackButton';
-
-function formatDate(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleString('en-CA', {
-    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
-  });
-}
+import { formatDateTime } from '../utils/date';
 
 // US-15 — shown only to the buyer, only once the order is Delivered.
 // order.review comes pre-attached from GET /api/orders/:id, so a page refresh
@@ -160,7 +154,7 @@ export default function OrderTrackingPage() {
           <h1 className="font-serif text-3xl md:text-4xl font-bold text-navy mb-1">
             Order #{order.id}
           </h1>
-          <p className="text-text-muted text-sm">Placed {formatDate(order.created_at)}</p>
+          <p className="text-text-muted text-sm">Placed {formatDateTime(order.created_at)}</p>
         </div>
         <button
           type="button"
@@ -178,7 +172,7 @@ export default function OrderTrackingPage() {
         <OrderStatusTimeline status={order.status} />
         {order.status_updated_at && (
           <p className="text-xs text-text-muted text-center mt-6">
-            Last updated {formatDate(order.status_updated_at)}
+            Last updated {formatDateTime(order.status_updated_at)}
           </p>
         )}
       </div>
